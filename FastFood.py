@@ -85,8 +85,6 @@ class FastFood:
         """
         # Nom du fastfood
         self.name = name
-        # lancement de la boucle par défaut
-        self.loop = asyncio.new_event_loop()
         # initialisation du tableau des commandes "vides"
         self.cmd_clients = [CommandClient()] * nb_commande
         # lancement du timer
