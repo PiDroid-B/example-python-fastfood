@@ -1,10 +1,10 @@
 # Fast food :
 
-Issu de :  [ZestDeSavoir.com](https://zestedesavoir.com/articles/1568/decouvrons-la-programmation-asynchrone-en-python/)
+Inspiré de :  [ZestDeSavoir.com](https://zestedesavoir.com/articles/1568/decouvrons-la-programmation-asynchrone-en-python/)
 
 On ne va pas attendre que la première commande soit servie pour prendre la deuxième
 
-## Pour chaque commande d'un menu :
+## Pour chaque commande d'un menu (définition de ZestDeSavoir) :
 
 ### burger :  
 Il n'y a que 3 cuisiniers.  
@@ -96,7 +96,8 @@ async def get_fries(client):
 <= A servi en 0:00:04.003093
 ```
 
-# Version refaite :
+# Version refaite via des classes etc... par mes soins :
+Fonctionnement similaire  
 exemple de sortie :
 ```
 
