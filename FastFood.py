@@ -6,10 +6,10 @@ from dataclasses import dataclass
 
 
 class CMD_STATE(Enum):
-    Undefined = 0
-    Ask = 1
-    In_Progress = 2
-    Get = 3
+    Undefined = ' '
+    Ask = '+'
+    In_Progress = 'o'
+    Get = '-'
 
 
 @dataclass
@@ -44,9 +44,10 @@ class CommandClient:
 
     def __repr__(self):
         """Renvoi une représentation textuel de l'état d'une commande au format 'BFS' (burger, frites, soda)"""
-        return CommandClient._format(self.burger) + \
-            CommandClient._format(self.frites) + \
-            CommandClient._format(self.soda)
+        # return CommandClient._format(self.burger) + \
+        #     CommandClient._format(self.frites) + \
+        #     CommandClient._format(self.soda)
+        return self.burger.value + self.frites.value + self .soda.value
 
     def do_release_finished(self):
         """Clôture les sous-commandes terminée"""
