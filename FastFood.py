@@ -1,5 +1,6 @@
 import asyncio
 import random
+import sys
 from datetime import datetime
 from enum import Enum
 from dataclasses import dataclass
@@ -123,7 +124,7 @@ class FastFood:
                 self._last_comment = ""
             except Exception as e:
                 print(type(e), e)
-                exit(1)
+                sys.exit(1)
 
         print(raw)
 
