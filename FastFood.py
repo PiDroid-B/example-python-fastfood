@@ -23,18 +23,6 @@ class CommandClient:
     frites: CMD_STATE
     soda: CMD_STATE
 
-    @staticmethod
-    def _format(value):
-        """Renvoi une représentation textuel de l'état d'une sous-commande (burger, frites ou soda)"""
-        if value == CMD_STATE.Ask:
-            return "+"
-        elif value == CMD_STATE.In_Progress:
-            return "o"
-        elif value == CMD_STATE.Get:
-            return "-"
-        else:
-            return " "
-
     def __init__(self, burger=CMD_STATE.Undefined, frites=CMD_STATE.Undefined, soda=CMD_STATE.Undefined):
         """Constructeur"""
         super().__init__()
