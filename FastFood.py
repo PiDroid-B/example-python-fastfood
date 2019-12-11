@@ -39,14 +39,19 @@ class CommandClient:
 
     def do_release_finished(self):
         """Clôture les sous-commandes terminée"""
-        def do_update(param):
+        def remove_state_get(param):
             if param == CMD_STATE.Get:
                 return CMD_STATE.Undefined
             return param
 
-        self.burger = do_update(self.burger)
-        self.frites = do_update(self.frites)
-        self.soda = do_update(self.soda)
+        self.burger = remove_state_get(self.burger)
+        self.frites = remove_state_get(self.frites)
+        self.soda = remove_state_get(self.soda)
+
+    def do_update(self, burger, frites, soda):
+        self.burger = burger
+        self.frites = frites
+        self.soda = soda
 
 
 class FastFood:
@@ -74,7 +79,9 @@ class FastFood:
         # Nom du fastfood
         self.name = name
         # initialisation du tableau des commandes "vides"
-        self.cmd_clients = [CommandClient()] * nb_commande
+        self.cmd_clients = []
+        # nombre de commande passé
+        self.nb_cmd = nb_commande
         # lancement du timer
         self.start_timer = datetime.now()
         # affichage de l'entete de sortie
@@ -87,20 +94,18 @@ class FastFood:
         """
         # affichage de l'entete de sortie
         if is_header:
-            # nombre de client
-            nb_clients = len(self.cmd_clients)
             # taille d'une ligne (hors préfixe d'horodatage)
-            raw_len = nb_clients * 4 + 1
+            raw_len = self.nb_cmd * 4 + 1
             # espace qui sera utilisé pour afficher les temps d'exécution
             prefix_time = "\n" + " " * 14
             # legende
             legende = "(B)urger  | (F)rites | (S)oda"
             # header 1 : colonnes de 3 chr : id par client
-            hd1 = "|" + "|".join(map(str, [f"{x:^3}" for x in range(1, nb_clients + 1)])) + "|"
+            hd1 = "|" + "|".join(map(str, [f"{x:^3}" for x in range(1, self.nb_cmd + 1)])) + "|"
             # header 2 : sous-colonnes Burger/Frites/Soda par client
-            hd2 = "|BFS" * nb_clients + "|"
+            hd2 = "|BFS" * self.nb_cmd + "|"
             # header 3 : ligne vide pour timer
-            hd3 = "  |" + "|".join(map(str, [f"   "] * nb_clients)) + "|"
+            hd3 = "  |" + "|".join(map(str, [f"   "] * self.nb_cmd)) + "|"
             # concat header
             raw = prefix_time + f"{legende:^{raw_len}}" + \
                 prefix_time + hd1 + \
@@ -159,7 +164,7 @@ class FastFood:
         burger = burger if burger != CMD_STATE.Undefined else self.cmd_clients[client].burger
         frites = frites if frites != CMD_STATE.Undefined else self.cmd_clients[client].frites
         soda = soda if soda != CMD_STATE.Undefined else self.cmd_clients[client].soda
-        self.cmd_clients[client] = CommandClient(burger, frites, soda)
+        self.cmd_clients[client].do_update(burger, frites, soda)
 
         # on affiche la ligne
         if notify :
@@ -232,9 +237,10 @@ class FastFood:
         try :
             if not isinstance(client,int) :
                 raise TypeError("Client doit être de type 'int'")
-            if  client > len(self.cmd_clients)-1 :
-                raise Exception("Client doit correspondre à l'ordre d'arrivée (index dans la file)")
-            if not isinstance(delay,(int,float)) :
+            if client > len(self.cmd_clients):
+                raise Exception("Client doit correspondre à l'ordre d'arrivée (index dans la file : "
+                                f"{client}, taille de la file {len(self.cmd_clients)}")
+            if not isinstance(delay,(int,float)):
                 raise TypeError("Delay represente le délai entre l'ouverture et l'arrivée du client, "
                                 "doit être de type 'int' ou 'float'")
         except Exception as e:
@@ -243,6 +249,9 @@ class FastFood:
             print("\n\nSortie en erreur")
             exit(1)
 
+        # on rajoute une nouvelle commande
+        self.cmd_clients.append(CommandClient())
+        
         await asyncio.sleep(delay)
         start_time = datetime.now()
         print( self._get_tick(), "=> Commande passée par {}".format(client))
