@@ -35,10 +35,11 @@ class CommandClient:
         # return CommandClient._format(self.burger) + \
         #     CommandClient._format(self.frites) + \
         #     CommandClient._format(self.soda)
-        return self.burger.value + self.frites.value + self .soda.value
+        return self.burger.value + self.frites.value + self.soda.value
 
     def do_release_finished(self):
         """Clôture les sous-commandes terminée"""
+
         def remove_state_get(param):
             if param == CMD_STATE.Get:
                 return CMD_STATE.Undefined
@@ -92,6 +93,7 @@ class FastFood:
         Affiche le tableau de résultat ligne par ligne
         Si is_header alors affiche la légende et l'entête
         """
+        raw = ''
         # affichage de l'entete de sortie
         if is_header:
             # taille d'une ligne (hors préfixe d'horodatage)
@@ -116,7 +118,7 @@ class FastFood:
         else:
             # Etat de la commande pour chaque client
             # en colonnes : (B)urger  | (F)rites | (S)oda
-            try :
+            try:
                 raw = self._get_tick() + "  |" + "|".join(map(str, self.cmd_clients)) + '|' + self._last_comment
                 self._last_comment = ""
             except Exception as e:
@@ -167,7 +169,7 @@ class FastFood:
         self.cmd_clients[client].do_update(burger, frites, soda)
 
         # on affiche la ligne
-        if notify :
+        if notify:
             self._print_line()
 
     async def _get_soda(self, client):
@@ -234,13 +236,13 @@ class FastFood:
         Tâche nv_commande : nouvelle commande passée
         Elle va initié les sous-commandes qui en découlent (burger, frites, soda)
         """
-        try :
-            if not isinstance(client,int) :
+        try:
+            if not isinstance(client, int):
                 raise TypeError("Client doit être de type 'int'")
             if client > len(self.cmd_clients):
                 raise Exception("Client doit correspondre à l'ordre d'arrivée (index dans la file : "
                                 f"{client}, taille de la file {len(self.cmd_clients)}")
-            if not isinstance(delay,(int,float)):
+            if not isinstance(delay, (int, float)):
                 raise TypeError("Delay represente le délai entre l'ouverture et l'arrivée du client, "
                                 "doit être de type 'int' ou 'float'")
         except Exception as e:
@@ -251,10 +253,10 @@ class FastFood:
 
         # on rajoute une nouvelle commande
         self.cmd_clients.append(CommandClient())
-        
+
         await asyncio.sleep(delay)
         start_time = datetime.now()
-        print( self._get_tick(), "=> Commande passée par {}".format(client))
+        print(self._get_tick(), "=> Commande passée par {}".format(client))
         await asyncio.wait(
             [
                 self._get_soda(client),
@@ -305,7 +307,7 @@ def main():
         # asyncio.get_event_loop().run_forever()
         asyncio.get_event_loop().run_until_complete(asyncio.gather(*tasks))
         print("Plus personne ? on ferme !")
-    except KeyboardInterrupt as e:
+    except KeyboardInterrupt:
         print("Barrez-vous ! c'est fermé et tant pis pour vos comandes !")
     except Exception as e:
         print("OUPS", type(e), e)
@@ -313,4 +315,3 @@ def main():
 
 if __name__ == "__main__":
     main()
-
