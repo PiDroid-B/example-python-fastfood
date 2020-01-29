@@ -14,22 +14,25 @@ class Soda:
     """
     _soda_preparation_time = 1
 
-    def __init__(self, callback_manager):
+    def __init__(self, clbk_command_updated, clbk_comment):
         """Constructeur
         callback_manager : permet d'informer le chef de l'avancement
         """
         self._soda_lock = asyncio.Lock()
-        self._clbk_manager = callback_manager
+        self.clbk_command_updated = clbk_command_updated
+        self.clbk_comment = clbk_comment
 
     async def get_portion(self, client):
         """récupère une portion pour un client, relance après la cuission si le bac est vide"""
         # Un soda pour {client} !
-        await self._clbk_manager(client=client, soda=CMD_STATE.Ask)
+        await self.clbk_command_updated(client=client, soda=CMD_STATE.Ask)
+        # await asyncio.sleep(0.2)
         # équivalent de with yield from
         async with self._soda_lock:
             # Une seule tâche à la fois peut exécuter ce bloc
-            await self._clbk_manager(client=client, soda=CMD_STATE.In_Progress,
-                                     last_message=f"** Préparation du soda du client {client}")
-            await asyncio.sleep(self._soda_preparation_time)
-            await self._clbk_manager(client, soda=CMD_STATE.Get)
+            await asyncio.sleep(self._soda_preparation_time / 2)
+            await self.clbk_comment(f"** Préparation du soda du client {client}")
+            await self.clbk_command_updated(client=client, soda=CMD_STATE.In_Progress)
+            await asyncio.sleep(self._soda_preparation_time / 2)
+            await self.clbk_command_updated(client, soda=CMD_STATE.Get)
 

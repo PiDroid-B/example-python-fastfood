@@ -1,4 +1,4 @@
-from .enums import *
+from cuisine.enums import *
 
 from dataclasses import dataclass
 
@@ -23,9 +23,6 @@ class CommandClient:
 
     def __repr__(self):
         """Renvoi une représentation textuel de l'état d'une commande au format 'BFS' (burger, frites, soda)"""
-        # return CommandClient._format(self.burger) + \
-        #     CommandClient._format(self.frites) + \
-        #     CommandClient._format(self.soda)
         return self.burger.value + self.frites.value + self.soda.value
 
     def do_release_finished(self):
@@ -35,6 +32,9 @@ class CommandClient:
             if param == CMD_STATE.Get:
                 return CMD_STATE.Undefined
             return param
+
+        if not self.burger or not self.frites or not self.soda:
+            raise Exception(f"something wrong : B{self.burger} or F{self.frites} or S{self.soda}")
 
         self.burger = remove_state_get(self.burger)
         self.frites = remove_state_get(self.frites)

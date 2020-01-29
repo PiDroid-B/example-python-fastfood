@@ -3,6 +3,7 @@ import lib.helpers as helpers
 
 import asyncio
 from datetime import datetime
+import logging
 
 
 class FastFoodManager:
@@ -14,7 +15,10 @@ class FastFoodManager:
         _last_comment : last message
     """
 
-    def __init__(self, nb_servers, fryer_capacity):
+    def __init__(self, nb_servers, fryer_capacity, nb_cmd):
+        self.log = logging.getLogger(__name__)
+        self.log.info("Manager is here !")
+
         # initialisation du tableau des commandes "vides"
         self._cmd_clients = []
         # lancement du timer
@@ -22,11 +26,18 @@ class FastFoodManager:
 
         # dernier message
         self._last_comment = ""
+        # horodatage du dernier changement d'état des commandes
+        self._old_tick = 0
 
         # on fait un coucou à toute l"équipe
-        self.burger = grill.Grill(nb_servers, self.clbk_feedback_cuisine)
-        self.frites = fryer.Fryer(fryer_capacity, self.clbk_feedback_cuisine)
-        self.soda = soda.Soda(self.clbk_feedback_cuisine)
+        self.burger = grill.Grill(nb_servers, self.clbk_command_updated, self.clbk_comment)
+        self.frites = fryer.Fryer(fryer_capacity, self.clbk_command_updated, self.clbk_comment)
+        self.soda = soda.Soda(self.clbk_command_updated, self.clbk_comment)
+
+        helpers.print_headers(self._get_tick(), nb_cmd)
+
+    def __del__(self):
+        self.log.info("Manager has gone out !")
 
     def _get_tick(self):
         """
@@ -53,13 +64,15 @@ class FastFoodManager:
             print("\n", type(e))
             print("\n", e)
             print("\n\nSortie en erreur")
-            exit(5)
+            raise e
 
         # on rajoute une nouvelle commande
         self._cmd_clients.append(cmd_clt.CommandClient())
+        self.log.debug(f"Manager has a new command for client({client}) !")
 
         await asyncio.sleep(delay)
         start_time = datetime.now()
+
         print(self._get_tick(), f"=> Commande passée par {client}")
         await asyncio.wait(
             [
@@ -72,9 +85,11 @@ class FastFoodManager:
         print(self._get_tick(), f"<= {client} servi en {datetime.now() - start_time}")
         return total
 
-    async def clbk_feedback_cuisine(self, client=None,
-                                    burger=None, soda=None, frites=None,
-                                    last_comment=None, notify=True):
+    async def clbk_command_updated(self, client,
+                                    burger=enums.CMD_STATE.Undefined,
+                                    soda=enums.CMD_STATE.Undefined,
+                                    frites=enums.CMD_STATE.Undefined
+                                           ):
         """
         CALLBACK : Appelé par les différentes entités de la cuisine afin d'informer de l'avancement
         Change l'état de la commande d'un client dans le tableau _cmd_clients
@@ -103,14 +118,22 @@ class FastFoodManager:
             clt.do_release_finished()
 
         # 2 on modifie l'état de la commande du client passé en paramètre
+        # if client:
         burger = burger if burger != enums.CMD_STATE.Undefined else self._cmd_clients[client].burger
         frites = frites if frites != enums.CMD_STATE.Undefined else self._cmd_clients[client].frites
         soda = soda if soda != enums.CMD_STATE.Undefined else self._cmd_clients[client].soda
         self._cmd_clients[client].do_update(burger, frites, soda)
 
-        if last_comment:
-            self._last_comment = last_comment
+        self.log.debug(f"command : new state for client({client}) - "
+                       f"burger>{self._cmd_clients[client].burger.name}, "
+                       f"frites>{self._cmd_clients[client].frites.name}, "
+                       f"soda>{self._cmd_clients[client].soda.name}")
 
-        # on affiche la ligne
-        if notify:
-            helpers.print_line(self._get_tick(), self._cmd_clients[client], self._last_comment)
+        current_tick = self._get_tick()
+        if current_tick != self._old_tick:
+            self._old_tick = current_tick
+            helpers.print_line(self._get_tick(), self._cmd_clients)
+
+    async def clbk_comment(self, comment):
+        helpers.print_line(self._get_tick(), self._cmd_clients, comment)
+
