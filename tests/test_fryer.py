@@ -7,7 +7,7 @@ from datetime import datetime
 
 
 class TestFryer(common.CommonCuisinePart):
-
+    # TODO : revoir les callback
     def test_prepare_portion(self):
         fryer_capacity = 4
         fryer_preparation_time = .2

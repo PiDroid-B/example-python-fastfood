@@ -8,7 +8,7 @@ from datetime import datetime
 
 
 class TestGrill(common.CommonCuisinePart):
-
+    # TODO : revoir les callback
     def test_one_client(self):
         machine_grill = grill.Grill(2, self._callback)
         machine_grill._grill_preparation_time = 0.1

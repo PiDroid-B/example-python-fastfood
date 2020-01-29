@@ -7,7 +7,7 @@ import asyncio
 
 
 class TestSoda(common.CommonCuisinePart):
-
+    # TODO : revoir les callback
     def test_one_client(self):
         machine_soda = soda.Soda(self._callback)
         machine_soda._soda_preparation_time = 0.1
